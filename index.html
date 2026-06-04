@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MSMR Kano – Admission Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --navy:#1e3a8a;--navy-dark:#1e2d6b;--navy-light:#2d4ba0;
+  --gold:#f59e0b;--gold-dark:#d97706;--gold-light:#fbbf24;
+  --white:#ffffff;--gray-50:#f8fafc;--gray-100:#f1f5f9;
+  --gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-600:#475569;--gray-800:#1e293b;
+  --red:#ef4444;--green:#22c55e;--radius:10px;
+  --shadow:0 4px 24px rgba(30,58,138,0.10);--shadow-lg:0 8px 40px rgba(30,58,138,0.18);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-800);min-height:100vh;}
+button{cursor:pointer;font-family:inherit;}
+input,select,textarea{font-family:inherit;}
+
+/* ── HOT NOTIFICATION MODAL ── */
+#hot-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);}
+#hot-modal.hidden{display:none;}
+.hot-modal-box{background:#fff;border-radius:18px;max-width:480px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:popin .35s ease;}
+@keyframes popin{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.hot-modal-header{background:linear-gradient(135deg,var(--red),#c62828);padding:1.25rem 1.5rem;display:flex;align-items:center;gap:10px;}
+.hot-modal-header h3{color:#fff;font-size:1.1rem;font-family:'Amiri',serif;flex:1;}
+.hot-modal-body{padding:1.5rem;max-height:60vh;overflow-y:auto;}
+.hot-notif-item{background:var(--gray-50);border-left:4px solid var(--red);border-radius:0 8px 8px 0;padding:1rem;margin-bottom:.75rem;}
+.hot-notif-item h4{font-size:14px;font-weight:700;color:var(--gray-800);margin-bottom:.3rem;}
+.hot-notif-item p{font-size:13px;color:var(--gray-600);line-height:1.6;}
+.hot-modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--gray-200);text-align:center;}
+.btn-dismiss{background:var(--navy);color:#fff;border:none;padding:.65rem 2rem;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;}
+
+/* ── HEADER ── */
+header{background:linear-gradient(135deg,var(--navy-dark) 0%,var(--navy) 60%,var(--navy-light) 100%);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;min-height:70px;border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,0.25);}
+.header-brand{display:flex;align-items:center;gap:12px;}
+.header-titles{line-height:1.2;}
+.header-titles h1{font-family:'Amiri',serif;font-size:1.2rem;font-weight:700;color:#fff;}
+.header-titles p{font-size:11px;color:rgba(255,255,255,0.6);letter-spacing:.04em;}
+nav{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;}
+.nav-btn{padding:6px 12px;border-radius:7px;font-size:12px;font-weight:500;border:1.5px solid transparent;transition:all .2s;color:rgba(255,255,255,0.85);background:transparent;}
+.nav-btn:hover{background:rgba(255,255,255,0.12);color:#fff;}
+.nav-btn.active{background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.25);}
+.nav-btn.gold{background:var(--gold);color:var(--navy-dark);border-color:var(--gold);font-weight:700;}
+.nav-btn.gold:hover{background:var(--gold-dark);}
+
+/* ── PAGES ── */
+.page{display:none;animation:fadein .35s ease;}
+.page.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── HERO ── */
+.hero{position:relative;min-height:360px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity .5s;opacity:0;}
+.hero-bg.loaded{opacity:1;}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(30,58,138,.55),rgba(30,58,138,.85));}
+.hero-content{position:relative;z-index:2;text-align:center;padding:3rem 1.5rem;color:#fff;}
+.hero-content h2{font-family:'Amiri',serif;font-size:clamp(1.8rem,5vw,3rem);font-weight:700;margin-bottom:.5rem;}
+.hero-arabic{font-family:'Amiri',serif;font-size:1.3rem;color:rgba(255,255,255,.6);direction:rtl;margin-bottom:1rem;}
+.hero-content p{font-size:1rem;color:rgba(255,255,255,.8);line-height:1.75;max-width:560px;margin:0 auto 1.5rem;}
+.hero-cta{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;}
+.btn-primary{background:var(--gold);color:var(--navy-dark);padding:.75rem 1.75rem;border-radius:8px;font-weight:700;font-size:14px;border:none;transition:all .2s;box-shadow:0 4px 12px rgba(245,158,11,.4);}
+.btn-primary:hover{background:var(--gold-dark);transform:translateY(-2px);}
+.btn-secondary{background:rgba(255,255,255,.15);color:#fff;padding:.75rem 1.75rem;border-radius:8px;font-weight:500;font-size:14px;border:1.5px solid rgba(255,255,255,.4);transition:all .2s;}
+.btn-secondary:hover{background:rgba(255,255,255,.25);}
+
+/* ── STATS STRIP ── */
+.stats-strip{background:var(--gold);display:flex;justify-content:center;flex-wrap:wrap;border-bottom:1px solid var(--gold-dark);}
+.stat-item{padding:1rem 2rem;text-align:center;border-right:1px solid rgba(0,0,0,.1);}
+.stat-item:last-child{border-right:none;}
+.stat-num{font-family:'Amiri',serif;font-size:1.75rem;font-weight:700;color:var(--navy-dark);}
+.stat-label{font-size:11px;color:var(--navy);font-weight:600;letter-spacing:.04em;}
+
+/* ── NOTICE BOARDS ── */
+.notice-section{max-width:960px;margin:2.5rem auto;padding:0 1.5rem;}
+.notice-section-title{font-family:'Amiri',serif;font-size:1.5rem;color:var(--navy-dark);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+.notice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;}
+.notice-card{background:#fff;border-radius:12px;padding:1.25rem;box-shadow:var(--shadow);border-top:4px solid var(--navy);transition:transform .2s;}
+.notice-card:hover{transform:translateY(-3px);}
+.notice-card h4{font-size:15px;font-weight:700;color:var(--navy-dark);margin-bottom:.5rem;}
+.notice-card p{font-size:13px;color:var(--gray-600);line-height:1.65;}
+.notice-card .notice-date{font-size:11px;color:var(--gray-400);margin-top:.75rem;font-weight:600;}
+.no-notices{text-align:center;padding:2rem;color:var(--gray-400);font-size:14px;}
+
+/* ── ABOUT / FEATURES ── */
+.about-section{max-width:960px;margin:2rem auto;padding:0 1.5rem;}
+.section-badge{display:inline-block;background:rgba(30,58,138,.08);color:var(--navy);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:999px;margin-bottom:.5rem;}
+.section-title{font-family:'Amiri',serif;font-size:clamp(1.4rem,3vw,2rem);color:var(--navy-dark);margin-bottom:.75rem;}
+.divider{width:44px;height:3px;background:var(--gold);border-radius:2px;margin-bottom:1.5rem;}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;}
+.feature-card{background:#fff;border-radius:var(--radius);padding:1.25rem;border:1px solid var(--gray-200);box-shadow:var(--shadow);transition:transform .2s;}
+.feature-card:hover{transform:translateY(-3px);}
+.feature-icon{font-size:2rem;margin-bottom:.75rem;}
+.feature-card h4{font-size:14px;font-weight:700;color:var(--navy-dark);margin-bottom:.4rem;}
+.feature-card p{font-size:13px;color:var(--gray-600);line-height:1.6;}
+
+/* ── RULES PAGE ── */
+.rules-wrap{max-width:760px;margin:2.5rem auto;padding:0 1.5rem;}
+.rules-card{background:#fff;border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden;}
+.rules-header{background:linear-gradient(135deg,var(--navy-dark),var(--navy));padding:1.75rem 2rem;color:#fff;text-align:center;}
+.rules-header h2{font-family:'Amiri',serif;font-size:1.6rem;}
+.rules-header p{font-size:13px;color:rgba(255,255,255,.7);margin-top:.25rem;}
+.rules-body{padding:2rem;}
+.rule-item{display:flex;gap:1rem;margin-bottom:1.25rem;align-items:flex-start;}
+.rule-num{width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.rule-text h4{font-size:14px;font-weight:700;color:var(--navy-dark);margin-bottom:.2rem;}
+.rule-text p{font-size:13px;color:var(--gray-600);line-height:1.6;}
+
+/* ── CONTAINER / CARD ── */
+.container{max-width:720px;margin:2rem auto;padding:0 1rem 3rem;}
+.container.wide{max-width:860px;}
+.card{background:#fff;border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden;margin-bottom:1.5rem;}
+.card-header{background:linear-gradient(135deg,var(--navy-dark),var(--navy));padding:1.5rem 2rem;color:#fff;text-align:center;}
+.card-header .card-icon{font-size:2.5rem;margin-bottom:.5rem;}
+.card-header h2{font-family:'Amiri',serif;font-size:1.5rem;font-weight:700;}
+.card-header p{font-size:13px;color:rgba(255,255,255,.7);margin-top:.25rem;}
+.card-body{padding:1.75rem 2rem;}
+.section-divider{border:none;border-top:2px dashed var(--gray-200);margin:1.5rem 0;}
+.subsection-title{font-size:14px;font-weight:700;color:var(--navy-dark);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:2px solid var(--gold);display:flex;align-items:center;gap:.5rem;}
+
+/* ── FORM ── */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.form-group{margin-bottom:1.1rem;}
+.form-label{display:block;font-size:13px;font-weight:600;color:var(--navy-dark);margin-bottom:.35rem;}
+.form-label .opt{font-size:11px;font-weight:400;color:var(--gray-400);}
+.form-control{width:100%;padding:.7rem .9rem;border:1.5px solid var(--gray-200);border-radius:8px;font-size:14px;color:var(--gray-800);transition:border-color .2s,box-shadow .2s;background:#fff;outline:none;}
+.form-control:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(30,58,138,.1);}
+.error-msg{font-size:12px;color:var(--red);margin-top:.3rem;display:flex;align-items:center;gap:4px;}
+.fun-tip{background:rgba(30,58,138,.05);border-left:3px solid var(--navy);border-radius:0 8px 8px 0;padding:.75rem 1rem;font-size:12px;color:var(--gray-600);margin-bottom:1.1rem;line-height:1.6;}
+.fun-tip.green{background:rgba(34,197,94,.07);border-color:var(--green);}
+.fun-tip.gold{background:rgba(245,158,11,.08);border-color:var(--gold);}
+
+/* ── PHOTO CAPTURE ── */
+.photo-capture-box{border:2px dashed var(--gray-200);border-radius:12px;padding:1.25rem;text-align:center;background:var(--gray-50);transition:border-color .2s;}
+.photo-capture-box:hover{border-color:var(--navy);}
+#camera-preview{width:100%;max-width:260px;border-radius:10px;display:none;margin:0 auto .75rem;border:3px solid var(--navy);}
+#photo-canvas{display:none;}
+#photo-thumb{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);display:none;margin:0 auto .75rem;box-shadow:0 4px 12px rgba(30,58,138,.2);}
+.camera-btn{background:var(--navy);color:#fff;border:none;padding:.55rem 1rem;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;margin:.25rem;}
+.camera-btn:hover{background:var(--navy-dark);}
+.camera-btn.red{background:var(--red);}
+.camera-btn.green{background:var(--green);}
+.photo-tip{font-size:11px;color:var(--gray-400);margin-top:.5rem;}
+
+/* ── USERNAME SUGGEST ── */
+.suggest-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem;}
+.chip{background:var(--gray-100);border:1.5px solid var(--gray-200);border-radius:999px;padding:.3rem .85rem;font-size:12px;font-weight:600;color:var(--navy-dark);cursor:pointer;transition:all .2s;}
+.chip:hover{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+/* ── STEPS ── */
+.steps{display:flex;justify-content:center;gap:0;margin-bottom:1.5rem;overflow-x:auto;padding-bottom:.25rem;}
+.step{display:flex;flex-direction:column;align-items:center;flex:1;min-width:50px;position:relative;}
+.step:not(:last-child)::after{content:'';position:absolute;top:15px;left:60%;width:80%;height:2px;background:var(--gray-200);z-index:0;}
+.step.done:not(:last-child)::after{background:var(--green);}
+.step-dot{width:30px;height:30px;border-radius:50%;background:var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:12px;position:relative;z-index:1;transition:all .3s;}
+.step.active .step-dot{background:var(--navy);color:#fff;box-shadow:0 0 0 3px rgba(30,58,138,.2);}
+.step.done .step-dot{background:var(--green);color:#fff;}
+.step-label{font-size:9px;color:var(--gray-400);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;text-align:center;}
+.step.active .step-label{color:var(--navy);}
+.step.done .step-label{color:var(--green);}
+
+/* ── AGREEMENT ── */
+.agreement-box{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:10px;padding:1rem;max-height:180px;overflow-y:auto;font-size:12px;color:var(--gray-600);line-height:1.7;margin-bottom:.75rem;}
+.checkbox-row{display:flex;align-items:flex-start;gap:.6rem;margin-bottom:.5rem;cursor:pointer;}
+.checkbox-row input{margin-top:2px;width:16px;height:16px;accent-color:var(--navy);flex-shrink:0;}
+.checkbox-row span{font-size:13px;color:var(--gray-700);line-height:1.5;}
+
+/* ── BTN ── */
+.btn-full{width:100%;padding:.9rem;border-radius:8px;font-size:15px;font-weight:700;background:var(--navy);color:#fff;border:none;transition:all .2s;box-shadow:0 4px 12px rgba(30,58,138,.3);}
+.btn-full:hover{background:var(--navy-dark);transform:translateY(-1px);}
+.btn-full.loading{opacity:.7;pointer-events:none;}
+.btn-full.gold-btn{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy-dark);}
+.btn-row{display:flex;gap:.75rem;}
+.btn-half{flex:1;padding:.8rem;border-radius:8px;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .2s;}
+.btn-back{background:var(--gray-100);color:var(--gray-600);border:1.5px solid var(--gray-200);}
+.btn-next{background:var(--navy);color:#fff;box-shadow:0 4px 12px rgba(30,58,138,.3);}
+.btn-next:hover{background:var(--navy-dark);}
+
+/* ── LOGIN ── */
+.login-options{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
+.login-option-btn{background:#fff;border:2px solid var(--gray-200);border-radius:12px;padding:1.25rem 1rem;text-align:center;cursor:pointer;transition:all .2s;}
+.login-option-btn:hover{border-color:var(--navy);background:rgba(30,58,138,.03);}
+.login-option-btn.selected{border-color:var(--navy);background:rgba(30,58,138,.07);}
+.opt-icon{font-size:2rem;margin-bottom:.5rem;}
+.opt-label{font-size:13px;font-weight:700;color:var(--navy-dark);}
+.opt-sub{font-size:11px;color:var(--gray-400);margin-top:2px;}
+
+/* ── BEAUTIFUL SLIP ── */
+.slip{background:#fff;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-lg);max-width:560px;margin:0 auto;border:1px solid var(--gray-200);}
+.slip-header{background:linear-gradient(135deg,#1e2d6b 0%,#1e3a8a 55%,#2d4ba0 100%);padding:1.5rem;color:#fff;position:relative;overflow:hidden;}
+.slip-header::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:rgba(245,158,11,.12);}
+.slip-header::after{content:'';position:absolute;bottom:-30px;left:-30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.06);}
+.slip-top-row{display:flex;align-items:center;gap:14px;position:relative;z-index:1;margin-bottom:1rem;}
+.slip-school-logo{width:54px;height:54px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);flex-shrink:0;}
+.slip-school-info h3{font-family:'Amiri',serif;font-size:1.05rem;font-weight:700;}
+.slip-school-info p{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px;line-height:1.5;}
+.slip-student-row{background:rgba(255,255,255,.12);border-radius:12px;padding:.85rem 1rem;display:flex;align-items:center;gap:1rem;position:relative;z-index:1;}
+.slip-student-photo{width:68px;height:68px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);flex-shrink:0;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.8rem;}
+.slip-student-details .name{font-family:'Amiri',serif;font-size:1.1rem;font-weight:700;}
+.slip-student-details .sid{font-size:11px;color:var(--gold-light);font-weight:600;letter-spacing:.05em;margin-top:2px;}
+.slip-program-tag{display:inline-block;background:var(--gold);color:var(--navy-dark);font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;margin-top:4px;}
+.slip-gold-bar{height:5px;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light),var(--gold),var(--gold-dark));}
+.slip-body{padding:1.25rem 1.5rem;}
+.slip-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem;}
+.slip-cell{background:var(--gray-50);border-radius:10px;padding:.8rem 1rem;border:1px solid var(--gray-200);}
+.slip-cell.full{grid-column:1/-1;}
+.slip-cell.interview{background:rgba(30,58,138,.06);border-color:rgba(30,58,138,.2);}
+.slip-cell label{font-size:9px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.25rem;}
+.slip-cell p{font-size:13px;font-weight:700;color:var(--navy-dark);}
+.slip-pending-box{grid-column:1/-1;background:rgba(245,158,11,.1);border:1.5px dashed var(--gold);border-radius:10px;padding:1rem;text-align:center;font-size:13px;color:var(--gold-dark);line-height:1.6;}
+.slip-footer{background:linear-gradient(135deg,var(--gray-50),var(--gray-100));padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--gray-200);}
+.slip-footer-note{font-size:10px;color:var(--gray-400);font-style:italic;}
+.slip-footer-addr{font-size:10px;color:var(--navy);font-weight:600;text-align:right;}
+.slip-actions{padding:1rem 1.5rem;display:flex;gap:.75rem;justify-content:center;border-top:1px solid var(--gray-100);}
+.slip-print-btn{background:linear-gradient(135deg,var(--navy-dark),var(--navy));color:#fff;border:none;padding:.7rem 1.75rem;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 12px rgba(30,58,138,.3);}
+.slip-print-btn:hover{transform:translateY(-1px);filter:brightness(1.1);}
+
+/* ── ADMIN ── */
+.admin-layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 73px);}
+.admin-sidebar{background:linear-gradient(180deg,var(--navy-dark),var(--navy));padding:1.25rem .75rem;color:#fff;}
+.sidebar-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.5rem;padding:0 .5rem;}
+.sidebar-item{display:flex;align-items:center;gap:8px;padding:.6rem .75rem;border-radius:8px;font-size:12px;font-weight:500;color:rgba(255,255,255,.75);cursor:pointer;transition:all .2s;margin-bottom:.2rem;}
+.sidebar-item:hover{background:rgba(255,255,255,.12);color:#fff;}
+.sidebar-item.active{background:rgba(245,158,11,.2);color:var(--gold-light);}
+.sidebar-badge{margin-left:auto;background:var(--gold);color:var(--navy-dark);font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;}
+.admin-main{background:var(--gray-50);padding:1.75rem;}
+.admin-panel{display:none;}
+.admin-panel.active{display:block;}
+.panel-title{font-family:'Amiri',serif;font-size:1.5rem;color:var(--navy-dark);margin-bottom:.25rem;}
+.panel-sub{font-size:13px;color:var(--gray-600);margin-bottom:1.25rem;}
+.toolbar{display:flex;gap:.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;}
+.search-input{flex:1;min-width:160px;padding:.6rem .9rem;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:var(--navy);}
+.counter-badge{background:var(--navy);color:#fff;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;}
+.filter-btn{padding:5px 12px;border-radius:999px;font-size:12px;font-weight:600;border:1.5px solid var(--gray-200);background:#fff;cursor:pointer;transition:all .2s;}
+.filter-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.btn-save{background:var(--gold);color:var(--navy-dark);border:none;padding:.55rem 1.1rem;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-save:hover{background:var(--gold-dark);}
+.btn-approve-all{background:var(--green);color:#fff;border:none;padding:.55rem 1.1rem;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;}
+.table-wrap{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead{background:linear-gradient(135deg,var(--navy-dark),var(--navy));}
+thead th{padding:.75rem 1rem;text-align:left;font-size:11px;font-weight:600;color:rgba(255,255,255,.85);letter-spacing:.04em;white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--gray-100);transition:background .15s;}
+tbody tr:hover{background:rgba(30,58,138,.03);}
+tbody td{padding:.75rem 1rem;font-size:12px;color:var(--gray-800);}
+.badge{padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;}
+.badge-program{background:rgba(30,58,138,.1);color:var(--navy);}
+.badge-approved{background:rgba(34,197,94,.15);color:#15803d;}
+.badge-pending{background:rgba(245,158,11,.15);color:var(--gold-dark);}
+.btn-edit{background:var(--navy);color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-delete{background:rgba(239,68,68,.1);color:var(--red);border:1.5px solid rgba(239,68,68,.2);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;margin-left:4px;}
+.btn-delete:hover{background:var(--red);color:#fff;}
+.no-data{text-align:center;padding:3rem;color:var(--gray-400);font-size:14px;}
+.student-thumb{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);vertical-align:middle;margin-right:6px;}
+.student-avatar{width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin-right:6px;}
+
+/* ── SETTINGS ── */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.settings-card{background:#fff;border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow);border:1px solid var(--gray-200);}
+.settings-card h3{font-size:14px;font-weight:700;color:var(--navy-dark);margin-bottom:.4rem;}
+.settings-card p{font-size:12px;color:var(--gray-600);margin-bottom:.85rem;line-height:1.5;}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px);}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:modalin .25s ease;}
+@keyframes modalin{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-header{background:linear-gradient(135deg,var(--navy-dark),var(--navy));padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1;}
+.modal-header h3{font-family:'Amiri',serif;font-size:1.1rem;color:#fff;}
+.modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:20px;cursor:pointer;}
+.modal-body{padding:1.25rem 1.5rem;}
+.modal-footer{padding:0 1.5rem 1.25rem;display:flex;gap:.75rem;justify-content:flex-end;}
+.btn-cancel{background:var(--gray-100);color:var(--gray-600);border:1.5px solid var(--gray-200);padding:.55rem 1.1rem;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;}
+.btn-confirm{background:var(--navy);color:#fff;border:none;padding:.55rem 1.1rem;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;background:var(--gray-800);color:#fff;padding:.75rem 1.25rem;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.3);display:none;max-width:300px;}
+#toast.success{background:var(--green);}
+#toast.error{background:var(--red);}
+
+/* ── FLOATER ── */
+.floater{position:fixed;pointer-events:none;animation:floatup 2.5s ease forwards;z-index:9998;}
+@keyframes floatup{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-180px) scale(1.3)}}
+
+/* ── SPINNER ── */
+.spinner{width:36px;height:36px;border:3px solid var(--gray-200);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;margin:2rem auto;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── ADMIN ITEMS ── */
+.admin-item{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--gray-50);border-radius:8px;margin-bottom:.5rem;border:1px solid var(--gray-200);}
+.admin-avatar-sm{width:34px;height:34px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+.badge-owner{background:rgba(245,158,11,.2);color:var(--gold-dark);font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;}
+.badge-admin-tag{background:rgba(30,58,138,.1);color:var(--navy);font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;}
+
+/* ── PRINT ── */
+@media print{
+  body *{visibility:hidden !important;}
+  #print-area,#print-area *{visibility:visible !important;}
+  #print-area{position:fixed !important;inset:0 !important;background:#fff !important;padding:15px !important;z-index:99999 !important;display:flex;align-items:center;justify-content:center;}
+  .slip{max-width:520px !important;margin:0 auto !important;border:2px solid #1e3a8a !important;box-shadow:none !important;}
+  .slip-header{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  .slip-gold-bar{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;background:#f59e0b !important;}
+  .slip-actions,.nav-btn,header,#notif-banner,.hot-modal-box{display:none !important;}
+  @page{size:A5 landscape;margin:.8cm;}
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  header{padding:0 .75rem;} .header-titles h1{font-size:.9rem;} .nav-btn{padding:5px 8px;font-size:11px;}
+  .admin-layout{grid-template-columns:1fr;} .admin-sidebar{display:flex;gap:.4rem;flex-wrap:wrap;padding:.75rem;}
+  .sidebar-title{display:none;} .settings-grid{grid-template-columns:1fr;} .form-row{grid-template-columns:1fr;}
+  .card-body{padding:1.25rem;} .slip-info-grid{grid-template-columns:1fr;}
+}
+@media(max-width:480px){
+  .hero-cta{flex-direction:column;align-items:stretch;} .stats-strip{flex-direction:column;}
+  .login-options{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<script>
+const SUPABASE_URL="https://qvzfipoefkgebqjtqhuk.supabase.co";
+const SUPABASE_KEY="sb_publishable_jxqLdjbSqHWlSIsjnbh_Aw_o5nHszVS";
+const API=`${SUPABASE_URL}/rest/v1`;
+const H={"Content-Type":"application/json","apikey":SUPABASE_KEY,"Authorization":`Bearer ${SUPABASE_KEY}`};
+const LOGO_B64="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";
+const SCHOOL_ADDR="No. 1 Sheikh Muhammad Rabi'u Road, Kano, Nigeria";
+
+async function sbSelect(t,q=""){const r=await fetch(`${API}/${t}?${q}`,{headers:H});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbInsert(t,d){const r=await fetch(`${API}/${t}`,{method:"POST",headers:{...H,"Prefer":"return=representation"},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbUpdate(t,m,d){const r=await fetch(`${API}/${t}?${m}`,{method:"PATCH",headers:{...H,"Prefer":"return=representation"},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sbDelete(t,m){const r=await fetch(`${API}/${t}?${m}`,{method:"DELETE",headers:H});if(!r.ok)throw new Error(await r.text());return true;}
+async function sbUpsert(t,d){const r=await fetch(`${API}/${t}`,{method:"POST",headers:{...H,"Prefer":"resolution=merge-duplicates,return=representation"},body:JSON.stringify(d)});if(!r.ok)throw new Error(await r.text());return r.json();}
+function genId(){return"MSMR-"+Math.random().toString(36).substring(2,7).toUpperCase();}
+</script>
+
+<!-- HOT NOTIFICATION MODAL -->
+<div id="hot-modal" class="hidden">
+  <div class="hot-modal-box">
+    <div class="hot-modal-header">
+      <span style="font-size:1.4rem;">🔔</span>
+      <h3>Important Announcements</h3>
+    </div>
+    <div class="hot-modal-body" id="hot-modal-body">
+      <div class="spinner"></div>
+    </div>
+    <div class="hot-modal-footer">
+      <button class="btn-dismiss" onclick="document.getElementById('hot-modal').classList.add('hidden')">✅ Got it, Continue</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-brand">
+    <img id="header-logo" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);flex-shrink:0;" alt="MSMR"/>
+    <div class="header-titles">
+      <h1>Mu'assasatu Sheikh Muhammad Rabi'u</h1>
+      <p>MSMR Kano · Qur'an Memorization Programme</p>
+    </div>
+  </div>
+  <nav>
+    <button class="nav-btn active" onclick="showPage('home')">🏠 Home</button>
+    <button class="nav-btn" onclick="showPage('register')">📝 Register</button>
+    <button class="nav-btn" onclick="showPage('rules')">📜 Rules</button>
+    <button class="nav-btn gold" onclick="showPage('login')">🔐 Login</button>
+  </nav>
+</header>
+
+<!-- ══════════════ HOME PAGE ══════════════ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-bg" id="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h2>🕌 Free Qur'an Memorization Programme</h2>
+      <div class="hero-arabic">مؤسسة الشيخ محمد ربيع – كانو</div>
+      <p>A free one-year hifz programme for students aged 15 and above. Build your sadaqah jāriyah. 🌙✨</p>
+      <div class="hero-cta">
+        <button class="btn-primary" onclick="showPage('register')">✍️ Apply Now — It's Free!</button>
+        <button class="btn-secondary" onclick="showPage('login')">🎫 Check My Interview Slip</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-strip">
+    <div class="stat-item"><div class="stat-num">1 yr</div><div class="stat-label">📅 Programme</div></div>
+    <div class="stat-item"><div class="stat-num">15+</div><div class="stat-label">🎂 Eligible Age</div></div>
+    <div class="stat-item"><div class="stat-num">Free</div><div class="stat-label">💰 No Fees</div></div>
+    <div class="stat-item"><div class="stat-num" id="stat-students">…</div><div class="stat-label">👥 Registered</div></div>
+  </div>
+
+  <!-- Notice Boards -->
+  <div class="notice-section">
+    <div class="notice-section-title">📋 Latest Announcements</div>
+    <div class="notice-grid" id="notice-grid">
+      <div class="no-notices">Loading announcements… ⏳</div>
+    </div>
+  </div>
+
+  <div class="about-section">
+    <div class="section-badge">✨ About the Programme</div>
+    <h2 class="section-title">Rooted in scholarship, built on sincerity</h2>
+    <div class="divider"></div>
+    <div class="feature-grid">
+      <div class="feature-card"><div class="feature-icon">📖</div><h4>Qur'an Memorization (Hifz)</h4><p>Complete 30 juz memorization with daily review, consolidation, and certified ijazah.</p></div>
+      <div class="feature-card"><div class="feature-icon">🎵</div><h4>Tajweed & Recitation</h4><p>Correct tajweed rules (Hafs 'an 'Āsim) with oral examination.</p></div>
+      <div class="feature-card"><div class="feature-icon">📚</div><h4>Islamic Studies</h4><p>Aqeedah, fiqh, seerah, and hadith to ground students in authentic deen.</p></div>
+      <div class="feature-card"><div class="feature-icon">🌟</div><h4>Character Formation</h4><p>Mentorship and akhlaq befitting a Hafiz of Allāh's Noble Book.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ RULES PAGE ══════════════ -->
+<div id="page-rules" class="page">
+  <div class="rules-wrap">
+    <div class="rules-card">
+      <div class="rules-header">
+        <div style="font-size:2.5rem;margin-bottom:.5rem;">📜</div>
+        <h2>School Rules & Regulations</h2>
+        <p>Mu'assasatu Sheikh Muhammad Rabi'u · MSMR Kano</p>
+      </div>
+      <div class="rules-body">
+        <div class="rule-item"><div class="rule-num">1</div><div class="rule-text"><h4>Punctuality</h4><p>All students must arrive on time for every session. Lateness of more than 15 minutes without a valid excuse will be recorded.</p></div></div>
+        <div class="rule-item"><div class="rule-num">2</div><div class="rule-text"><h4>Respect & Conduct</h4><p>Students must show respect to all teachers, staff, and fellow students at all times, inside and outside the school premises.</p></div></div>
+        <div class="rule-item"><div class="rule-num">3</div><div class="rule-text"><h4>Qur'an Handling</h4><p>The Qur'an must always be handled with respect — in a state of wudhu, placed on a clean surface, and never put on the floor.</p></div></div>
+        <div class="rule-item"><div class="rule-num">4</div><div class="rule-text"><h4>Daily Memorization</h4><p>Every student is expected to memorize their daily portion (wird) and present it to their teacher. Consistent failure will be noted.</p></div></div>
+        <div class="rule-item"><div class="rule-num">5</div><div class="rule-text"><h4>Mobile Phones</h4><p>Mobile phones must be switched off or on silent during all classes and Qur'an sessions. Unauthorized use is prohibited.</p></div></div>
+        <div class="rule-item"><div class="rule-num">6</div><div class="rule-text"><h4>Dress Code</h4><p>All students must dress modestly and appropriately in Islamic attire. No tight, transparent, or inappropriate clothing is allowed.</p></div></div>
+        <div class="rule-item"><div class="rule-num">7</div><div class="rule-text"><h4>Attendance</h4><p>Minimum 85% attendance is required. Absences must be reported in advance. Unexplained absences may result in dismissal.</p></div></div>
+        <div class="rule-item"><div class="rule-num">8</div><div class="rule-text"><h4>Part-Time (Biye) Students</h4><p>Biye students must attend all Saturday and Sunday sessions without fail. Weekend-only absences follow the same attendance policy.</p></div></div>
+        <div class="rule-item"><div class="rule-num">9</div><div class="rule-text"><h4>Cleanliness</h4><p>Students are responsible for keeping their space clean. Littering on school premises is strictly prohibited.</p></div></div>
+        <div class="rule-item"><div class="rule-num">10</div><div class="rule-text"><h4>Academic Integrity</h4><p>Cheating, impersonation, or falsifying memorization progress is a serious offence and may result in immediate expulsion.</p></div></div>
+        <div style="margin-top:1.5rem;padding:1rem;background:rgba(245,158,11,.1);border-radius:10px;border-left:4px solid var(--gold);">
+          <p style="font-size:13px;color:var(--gray-700);line-height:1.7;">🤲 <strong>By registering, students and their guardians agree to abide by all these rules.</strong> The school reserves the right to amend these rules with notice to students and guardians.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ REGISTER PAGE ══════════════ -->
+<div id="page-register" class="page">
+  <div class="container wide">
+
+    <!-- Steps -->
+    <div class="steps" id="reg-steps" style="margin-bottom:1.25rem;">
+      <div class="step active" id="step-1"><div class="step-dot">👤</div><div class="step-label">Personal</div></div>
+      <div class="step" id="step-2"><div class="step-dot">📸</div><div class="step-label">Photo</div></div>
+      <div class="step" id="step-3"><div class="step-dot">📋</div><div class="step-label">Programme</div></div>
+      <div class="step" id="step-4"><div class="step-dot">👨‍👩‍👦</div><div class="step-label">Next of Kin</div></div>
+      <div class="step" id="step-5"><div class="step-dot">🔑</div><div class="step-label">Account</div></div>
+      <div class="step" id="step-6"><div class="step-dot">✅</div><div class="step-label">Agree</div></div>
+    </div>
+
+    <!-- STEP 1: Personal Info -->
+    <div class="card reg-step" id="reg-step-1">
+      <div class="card-header"><div class="card-icon">👤</div><h2>Personal Information</h2><p>Tell us about the student 📖</p></div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input class="form-control" id="r-name" type="text" placeholder="e.g. Abdullahi Musa Ibrahim"/>
+            <div class="error-msg" id="e-name"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date of Birth *</label>
+            <input class="form-control" id="r-dob" type="date"/>
+            <div class="error-msg" id="e-dob"></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Phone Number <span class="opt">(optional)</span></label>
+            <input class="form-control" id="r-phone" type="tel" placeholder="e.g. 08012345678" maxlength="11" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gender *</label>
+            <select class="form-control" id="r-gender">
+              <option value="">— Select Gender —</option>
+              <option value="Male">👦 Male</option>
+              <option value="Female">👧 Female</option>
+            </select>
+            <div class="error-msg" id="e-gender"></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">State of Origin *</label>
+            <select class="form-control" id="r-state">
+              <option value="">— Select State —</option>
+              <option>Abia</option><option>Adamawa</option><option>Akwa Ibom</option><option>Anambra</option><option>Bauchi</option><option>Bayelsa</option><option>Benue</option><option>Borno</option><option>Cross River</option><option>Delta</option><option>Ebonyi</option><option>Edo</option><option>Ekiti</option><option>Enugu</option><option>FCT</option><option>Gombe</option><option>Imo</option><option>Jigawa</option><option>Kaduna</option><option>Kano</option><option>Katsina</option><option>Kebbi</option><option>Kogi</option><option>Kwara</option><option>Lagos</option><option>Nasarawa</option><option>Niger</option><option>Ogun</option><option>Ondo</option><option>Osun</option><option>Oyo</option><option>Plateau</option><option>Rivers</option><option>Sokoto</option><option>Taraba</option><option>Yobe</option><option>Zamfara</option>
+            </select>
+            <div class="error-msg" id="e-state"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">L.G.A (Local Government Area) *</label>
+            <input class="form-control" id="r-lga" type="text" placeholder="e.g. Nassarawa"/>
+            <div class="error-msg" id="e-lga"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Home Address *</label>
+          <textarea class="form-control" id="r-address" rows="2" placeholder="e.g. No. 5 Ungwan Uku, Kano"></textarea>
+          <div class="error-msg" id="e-address"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Any Illness or Medical Condition <span class="opt">(optional)</span></label>
+          <input class="form-control" id="r-illness" type="text" placeholder="e.g. Asthma, Diabetes — or leave blank"/>
+        </div>
+        <div class="btn-row">
+          <button class="btn-half btn-next" onclick="goStep(2)">Next: Photo 📸 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Photo -->
+    <div class="card reg-step" id="reg-step-2" style="display:none;">
+      <div class="card-header"><div class="card-icon">📸</div><h2>Student Photo</h2><p>A clear, front-facing photo is required 🙂</p></div>
+      <div class="card-body">
+        <div class="fun-tip">💡 <strong>Tip:</strong> Use good lighting, face the camera directly, and make sure your face is clearly visible. This photo will appear on your interview slip!</div>
+        <div class="form-group">
+          <div class="photo-capture-box">
+            <img id="photo-thumb" src="" alt="Photo"/>
+            <video id="camera-preview" autoplay playsinline></video>
+            <canvas id="photo-canvas"></canvas>
+            <div id="camera-btns">
+              <button type="button" class="camera-btn" onclick="startCamera()">📷 Open Camera</button>
+              <label class="camera-btn" style="display:inline-block;cursor:pointer;">
+                🖼️ Upload Photo
+                <input type="file" accept="image/*" style="display:none;" onchange="uploadPhoto(this)"/>
+              </label>
+            </div>
+            <div id="capture-btns" style="display:none;">
+              <button type="button" class="camera-btn green" onclick="capturePhoto()">📸 Take Photo</button>
+              <button type="button" class="camera-btn red" onclick="stopCamera()">✕ Cancel</button>
+            </div>
+            <div id="retake-btns" style="display:none;">
+              <button type="button" class="camera-btn" onclick="retakePhoto()">🔄 Retake Photo</button>
+            </div>
+            <div class="photo-tip" id="photo-tip">Take or upload a clear front-facing photo</div>
+          </div>
+          <div class="error-msg" id="e-photo"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-half btn-back" onclick="goStep(1)">← Back</button>
+          <button class="btn-half btn-next" onclick="goStep(3)">Next: Programme 📋 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Programme -->
+    <div class="card reg-step" id="reg-step-3" style="display:none;">
+      <div class="card-header"><div class="card-icon">📋</div><h2>Programme Selection</h2><p>Choose the right programme for you 🕌</p></div>
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">Programme *</label>
+          <select class="form-control" id="r-program">
+            <option value="">— Select Programme —</option>
+            <option value="Hadda (Full Time)">📅 Hadda – Full Time (Mon–Fri)</option>
+            <option value="Biye (Part Time)">🌿 Biye – Part Time (Sat &amp; Sun only)</option>
+          </select>
+          <div class="error-msg" id="e-program"></div>
+        </div>
+        <div class="fun-tip gold">📅 <strong>Hadda (Full Time):</strong> Monday to Friday, full daily sessions.<br/>🌿 <strong>Biye (Part Time):</strong> Saturday and Sunday only — ideal for students still in school.</div>
+        <div class="fun-tip">📜 <strong>Before continuing</strong>, please read and understand the <button onclick="showPage('rules')" style="background:none;border:none;color:var(--navy);font-weight:700;cursor:pointer;text-decoration:underline;">School Rules & Regulations</button>.</div>
+        <div class="btn-row">
+          <button class="btn-half btn-back" onclick="goStep(2)">← Back</button>
+          <button class="btn-half btn-next" onclick="goStep(4)">Next: Next of Kin 👨‍👩‍👦 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Next of Kin -->
+    <div class="card reg-step" id="reg-step-4" style="display:none;">
+      <div class="card-header"><div class="card-icon">👨‍👩‍👦</div><h2>Next of Kin / Guardian</h2><p>Emergency contact information 📞</p></div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Guardian's Full Name *</label>
+            <input class="form-control" id="r-kin-name" type="text" placeholder="e.g. Musa Ibrahim"/>
+            <div class="error-msg" id="e-kin-name"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Relationship *</label>
+            <select class="form-control" id="r-kin-rel">
+              <option value="">— Select Relationship —</option>
+              <option value="Father">👨 Father</option>
+              <option value="Mother">👩 Mother</option>
+              <option value="Uncle">👴 Uncle</option>
+              <option value="Aunt">👵 Aunt</option>
+              <option value="Brother">🧑 Brother</option>
+              <option value="Sister">👧 Sister</option>
+              <option value="Grandfather">👴 Grandfather</option>
+              <option value="Guardian">🧑‍🦱 Guardian / Sponsor</option>
+              <option value="Other">Other</option>
+            </select>
+            <div class="error-msg" id="e-kin-rel"></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Guardian's Phone Number *</label>
+            <input class="form-control" id="r-kin-phone" type="tel" placeholder="e.g. 08099887766" maxlength="11" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+            <div class="error-msg" id="e-kin-phone"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Guardian's Email <span class="opt">(optional)</span></label>
+            <input class="form-control" id="r-kin-email" type="email" placeholder="e.g. guardian@email.com"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Guardian's Address *</label>
+          <textarea class="form-control" id="r-kin-address" rows="2" placeholder="Guardian's home address"></textarea>
+          <div class="error-msg" id="e-kin-address"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-half btn-back" onclick="goStep(3)">← Back</button>
+          <button class="btn-half btn-next" onclick="goStep(5)">Next: Create Account 🔑 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5: Account -->
+    <div class="card reg-step" id="reg-step-5" style="display:none;">
+      <div class="card-header"><div class="card-icon">🔑</div><h2>Create Your Account</h2><p>You'll use this to check your interview slip 🎫</p></div>
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">Username *</label>
+          <input class="form-control" id="r-username" type="text" placeholder="Choose a username" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_.]/g,'')"/>
+          <div class="error-msg" id="e-username"></div>
+          <div class="suggest-chips" id="username-chips"></div>
+          <div style="font-size:11px;color:var(--gray-400);margin-top:.4rem;">💡 Click a suggestion or type your own (letters, numbers, _ . only)</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password *</label>
+          <div style="position:relative;">
+            <input class="form-control" id="r-password" type="password" placeholder="Choose a password (min 6 characters)" style="padding-right:2.75rem;"/>
+            <button type="button" onclick="togglePwd('r-password',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:16px;cursor:pointer;color:var(--gray-400);">👁</button>
+          </div>
+          <div class="error-msg" id="e-password"></div>
+          <div class="suggest-chips" id="pwd-chips" style="margin-top:.5rem;"></div>
+          <div style="font-size:11px;color:var(--gray-400);margin-top:.4rem;">💡 Or click a suggestion for an easy memorable password</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address <span class="opt">(optional)</span></label>
+          <input class="form-control" id="r-email" type="email" placeholder="e.g. student@email.com"/>
+        </div>
+        <div class="btn-row">
+          <button class="btn-half btn-back" onclick="goStep(4)">← Back</button>
+          <button class="btn-half btn-next" onclick="goStep(6)">Next: Agreement ✅ →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 6: Agreement -->
+    <div class="card reg-step" id="reg-step-6" style="display:none;">
+      <div class="card-header"><div class="card-icon">📜</div><h2>Agreement & Submission</h2><p>Almost done! Just confirm below 🤲</p></div>
+      <div class="card-body">
+        <div class="fun-tip gold">📋 Please read the agreement carefully before submitting.</div>
+        <div class="agreement-box">
+          <strong>Student & Guardian Agreement</strong><br/><br/>
+          I / We, the undersigned student and guardian, hereby agree to the following:<br/><br/>
+          1. The student will abide by all rules and regulations of Mu'assasatu Sheikh Muhammad Rabi'u (MSMR Kano) as outlined in the School Rules page.<br/><br/>
+          2. The student will attend sessions regularly and punctually, maintaining the required 85% attendance rate.<br/><br/>
+          3. The student will treat the Qur'an, teachers, staff, and fellow students with the utmost respect at all times.<br/><br/>
+          4. The guardian acknowledges that the school may contact them regarding the student's performance, attendance, or conduct.<br/><br/>
+          5. The school reserves the right to dismiss a student whose conduct is repeatedly in violation of school rules.<br/><br/>
+          6. All information provided during registration is true and accurate to the best of our knowledge.<br/><br/>
+          7. We understand that the programme is entirely free and no fees will be charged. The school may, however, request voluntary contributions for special events.<br/><br/>
+          May Allah bless this endeavour and make it a means of benefit for this world and the hereafter. آمين
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="agree1"/>
+          <span>I have read and understood the School Rules & Regulations and agree to abide by them.</span>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="agree2"/>
+          <span>I confirm that all information I have provided is true and accurate.</span>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="agree3"/>
+          <span>The guardian/next of kin consents to this registration and agrees to the school's policies.</span>
+        </div>
+        <div class="error-msg" id="e-agree"></div>
+        <div style="margin-top:1.25rem;">
+          <div class="btn-row">
+            <button class="btn-half btn-back" onclick="goStep(5)">← Back</button>
+            <button class="btn-half btn-next gold-btn" id="reg-btn" onclick="submitRegistration()" style="background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy-dark);">🚀 Submit Application!</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ LOGIN PAGE ══════════════ -->
+<div id="page-login" class="page">
+  <div class="container">
+    <div class="card">
+      <div class="card-header"><div class="card-icon">🔍</div><h2>Welcome Back!</h2><p>Check your interview slip or manage the portal 👋</p></div>
+      <div class="card-body">
+        <div class="login-options">
+          <div class="login-option-btn selected" id="opt-student" onclick="selectLoginType('student')">
+            <div class="opt-icon">🎓</div><div class="opt-label">Student</div><div class="opt-sub">Check my slip</div>
+          </div>
+          <div class="login-option-btn" id="opt-admin" onclick="selectLoginType('admin')">
+            <div class="opt-icon">🛡️</div><div class="opt-label">Admin</div><div class="opt-sub">Manage portal</div>
+          </div>
+        </div>
+        <div id="student-login-form">
+          <div class="fun-tip">🔑 <strong>Enter your username and password</strong> that you created during registration.</div>
+          <div class="form-group">
+            <label class="form-label">👤 Username</label>
+            <input class="form-control" id="login-username" type="text" placeholder="Your username"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">🔑 Password</label>
+            <div style="position:relative;">
+              <input class="form-control" id="login-password" type="password" placeholder="Your password" style="padding-right:2.75rem;"/>
+              <button type="button" onclick="togglePwd('login-password',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:16px;cursor:pointer;color:var(--gray-400);">👁</button>
+            </div>
+            <div class="error-msg" id="err-login"></div>
+          </div>
+          <button class="btn-full" id="login-btn" onclick="doStudentLogin()">🎫 View My Interview Slip</button>
+        </div>
+        <div id="admin-login-form" style="display:none;">
+          <div class="fun-tip">🛡️ <strong>Admin Area</strong> — Restricted access only.</div>
+          <div class="form-group">
+            <label class="form-label">🔑 Admin Password</label>
+            <div style="position:relative;">
+              <input class="form-control" id="admin-pwd" type="password" placeholder="Enter admin password" style="padding-right:2.75rem;"/>
+              <button type="button" onclick="togglePwd('admin-pwd',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:16px;cursor:pointer;color:var(--gray-400);">👁</button>
+            </div>
+            <div class="error-msg" id="err-admin"></div>
+          </div>
+          <button class="btn-full" id="admin-btn" onclick="doAdminLogin()">🛡️ Enter Admin Dashboard</button>
+        </div>
+      </div>
+    </div>
+    <div id="slip-container" style="display:none;margin-top:1.5rem;">
+      <div id="print-area">
+      <div class="slip">
+        <div class="slip-header">
+          <div class="slip-top-row">
+            <img id="slip-logo" class="slip-school-logo" src="" alt="MSMR"/>
+            <div class="slip-school-info">
+              <h3>Mu'assasatu Sheikh Muhammad Rabi'u</h3>
+              <p>Official Interview Admission Slip · MSMR Kano<br/>📍 No. 1 Sheikh Muhammad Rabi'u Road, Kano, Nigeria</p>
+            </div>
+          </div>
+          <div class="slip-student-row">
+            <div id="slip-photo" class="slip-student-photo">👤</div>
+            <div class="slip-student-details">
+              <div class="name" id="slip-name">—</div>
+              <div class="sid" id="slip-id">ID: —</div>
+              <div class="slip-program-tag" id="slip-program">—</div>
+            </div>
+          </div>
+        </div>
+        <div class="slip-gold-bar"></div>
+        <div class="slip-body">
+          <div class="slip-info-grid">
+            <div class="slip-cell"><label>📱 Phone</label><p id="slip-phone">—</p></div>
+            <div class="slip-cell"><label>🎂 Date of Birth</label><p id="slip-dob">—</p></div>
+            <div class="slip-cell"><label>⚧ Gender</label><p id="slip-gender">—</p></div>
+            <div class="slip-cell"><label>🗺️ State / LGA</label><p id="slip-state">—</p></div>
+            <div class="slip-cell full"><label>🏠 Address</label><p id="slip-address">—</p></div>
+            <div class="slip-cell"><label>👨‍👩‍👦 Guardian</label><p id="slip-kin">—</p></div>
+            <div class="slip-cell"><label>📅 Registered</label><p id="slip-reg-date">—</p></div>
+            <div id="slip-interview-cells" style="display:contents;">
+              <div class="slip-pending-box">⏳ Interview details not set yet. Please check back later.</div>
+            </div>
+          </div>
+        </div>
+        <div class="slip-footer">
+          <span class="slip-footer-note">🗂️ Keep this slip safe — bring it to your interview</span>
+          <span class="slip-footer-addr">📍 MSMR Kano · 2025/2026</span>
+        </div>
+        <div class="slip-actions">
+          <button class="slip-print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ADMIN DASHBOARD ══════════════ -->
+<div id="page-admin" class="page">
+  <div class="admin-layout">
+    <div class="admin-sidebar">
+      <div class="sidebar-title">Dashboard</div>
+      <div class="sidebar-item active" onclick="showPanel('students',this)"><span>👥</span>Students<span class="sidebar-badge" id="sidebar-count">0</span></div>
+      <div class="sidebar-item" onclick="showPanel('approve',this)"><span>✅</span>Bulk Approve<span class="sidebar-badge" id="sidebar-pending">0</span></div>
+      <div class="sidebar-item" onclick="showPanel('notices',this)"><span>📋</span>Notices</div>
+      <div class="sidebar-item" onclick="showPanel('admins',this)"><span>🛡️</span>Admins</div>
+      <div class="sidebar-item" onclick="showPanel('settings',this)"><span>⚙️</span>Settings</div>
+      <div class="sidebar-item" onclick="adminLogout()"><span>🚪</span>Logout</div>
+    </div>
+    <div class="admin-main">
+
+      <!-- Students Panel -->
+      <div class="admin-panel active" id="panel-students">
+        <div class="panel-title">👥 All Registered Students</div>
+        <div class="panel-sub">Full list of registered applicants.</div>
+        <div class="toolbar">
+          <input class="search-input" id="search-input" type="text" placeholder="🔍 Search name, username, phone…" oninput="renderStudents()"/>
+          <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+          <button class="filter-btn" onclick="setFilter('approved',this)">✅ Approved</button>
+          <button class="filter-btn" onclick="setFilter('pending',this)">⏳ Pending</button>
+          <div class="counter-badge">Total: <span id="admin-count">0</span></div>
+          <button class="btn-save" onclick="loadStudents()">↺ Refresh</button>
+          <button class="btn-save" onclick="exportCSV()">📥 CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Photo</th><th>Name</th><th>Username</th><th>Phone</th><th>Programme</th><th>Gender</th><th>State</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="students-tbody"><tr><td colspan="9"><div class="spinner"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Bulk Approve Panel -->
+      <div class="admin-panel" id="panel-approve">
+        <div class="panel-title">✅ Bulk Interview Approval</div>
+        <div class="panel-sub">Select students, set interview details, then approve all at once.</div>
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="card-body">
+            <div class="subsection-title">📅 Set Interview Details for Selected Students</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Interview Date</label>
+                <input class="form-control" id="bulk-date" type="date"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Interview Time</label>
+                <input class="form-control" id="bulk-time" type="time"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Venue</label>
+              <input class="form-control" id="bulk-venue" type="text" placeholder="e.g. Main Hall, MSMR Kano"/>
+            </div>
+            <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+              <button class="btn-approve-all" onclick="bulkApprove()">✅ Approve Selected Students</button>
+              <button class="btn-save" onclick="selectAllPending()">☑️ Select All Pending</button>
+              <button class="btn-save" onclick="clearSelection()">✕ Clear Selection</button>
+              <span id="selected-count" style="font-size:13px;color:var(--gray-600);">0 selected</span>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th><input type="checkbox" id="check-all" onchange="toggleAllCheck(this)"/></th><th>Photo</th><th>Name</th><th>Programme</th><th>Phone</th><th>Status</th></tr></thead>
+            <tbody id="approve-tbody"><tr><td colspan="6"><div class="spinner"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Notices Panel -->
+      <div class="admin-panel" id="panel-notices">
+        <div class="panel-title">📋 Announcements</div>
+        <div class="panel-sub">Manage notices shown on the homepage and the hot popup.</div>
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="card-body">
+            <div class="subsection-title">➕ Add Announcement</div>
+            <div class="form-group">
+              <label class="form-label">Title</label>
+              <input class="form-control" id="notif-title" type="text" placeholder="e.g. Interview Dates Released"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Message</label>
+              <textarea class="form-control" id="notif-body" rows="3" placeholder="Full announcement text…"></textarea>
+            </div>
+            <div class="checkbox-row" style="margin-bottom:1rem;">
+              <input type="checkbox" id="notif-hot"/>
+              <span>🔥 Mark as HOT (shows as popup when visitors arrive)</span>
+            </div>
+            <button class="btn-save" onclick="addNotice()">📢 Publish Announcement</button>
+          </div>
+        </div>
+        <div id="notices-list"><div class="spinner"></div></div>
+      </div>
+
+      <!-- Admins Panel -->
+      <div class="admin-panel" id="panel-admins">
+        <div class="panel-title">🛡️ Admin Management</div>
+        <div class="panel-sub">Add or remove admin accounts.</div>
+        <div style="max-width:500px;">
+          <div class="settings-card" style="margin-bottom:1.25rem;">
+            <h3>➕ Add New Admin</h3>
+            <p>New admin can log in with their name and password.</p>
+            <div class="form-group"><label class="form-label">Name</label><input class="form-control" id="new-admin-name" type="text" placeholder="e.g. Malam Yusuf"/></div>
+            <div class="form-group"><label class="form-label">Password</label><input class="form-control" id="new-admin-pwd" type="password" placeholder="Strong password"/></div>
+            <button class="btn-save" onclick="addAdmin()">✅ Add Admin</button>
+          </div>
+          <div class="settings-card">
+            <h3>👥 Current Admins</h3>
+            <div id="admin-list"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Panel -->
+      <div class="admin-panel" id="panel-settings">
+        <div class="panel-title">⚙️ Portal Settings</div>
+        <div class="panel-sub">Hero photo and site settings.</div>
+        <div class="settings-grid">
+          <div class="settings-card">
+            <h3>🖼️ Homepage Hero Photo</h3>
+            <p>Paste a direct image URL.</p>
+            <div class="form-group"><input class="form-control" id="setting-image" type="url" placeholder="https://…"/></div>
+            <button class="btn-save" onclick="saveSetting('image')">🖼️ Update Photo</button>
+          </div>
+          <div class="settings-card">
+            <h3>📊 Stats</h3>
+            <p>Current portal statistics.</p>
+            <div id="admin-stats" style="font-size:13px;color:var(--gray-600);line-height:2;">Loading…</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header"><h3>✏️ Edit Interview Details</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--gray-600);margin-bottom:1rem;">Student: <strong id="modal-name">—</strong></p>
+      <div class="form-group"><label class="form-label">📅 Interview Date</label><input class="form-control" id="modal-date" type="date"/></div>
+      <div class="form-group"><label class="form-label">🕐 Time</label><input class="form-control" id="modal-time" type="time"/></div>
+      <div class="form-group"><label class="form-label">📍 Venue</label><input class="form-control" id="modal-venue" type="text" placeholder="e.g. Main Hall"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm" onclick="saveEdit()">✅ Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ────────────────────────────
+let allStudents=[],currentFilter='all',editingId=null,loginType='student';
+let cameraStream=null,capturedPhoto=null;
+const LOGO_SRC='data:image/png;base64,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';
+
+// ── Init logo ────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('header-logo').src=LOGO_SRC;
+  document.getElementById('slip-logo').src=LOGO_SRC;
+  generateUsernameSuggestions();
+  generatePasswordSuggestions();
+});
+
+// ── Toast ────────────────────────────
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=type;t.style.display='block';
+  setTimeout(()=>t.style.display='none',3500);
+}
+
+// ── Floater ──────────────────────────
+function spawnEmoji(list){
+  for(let i=0;i<7;i++)setTimeout(()=>{
+    const el=document.createElement('div');
+    el.className='floater';
+    el.textContent=list[Math.floor(Math.random()*list.length)];
+    el.style.cssText=`left:${10+Math.random()*80}vw;bottom:80px;font-size:${1.2+Math.random()}rem;`;
+    document.body.appendChild(el);setTimeout(()=>el.remove(),2700);
+  },i*180);
+}
+
+// ── Pwd toggle ───────────────────────
+function togglePwd(id,btn){
+  const el=document.getElementById(id);
+  el.type=el.type==='password'?'text':'password';
+  btn.textContent=el.type==='password'?'👁':'🙈';
+}
+
+// ── Page nav ─────────────────────────
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const m={home:0,register:1,rules:2,login:3};
+  if(m[name]!==undefined)document.querySelectorAll('.nav-btn')[m[name]].classList.add('active');
+  if(name==='login'){resetLoginPage();}
+}
+
+function resetLoginPage(){
+  document.getElementById('slip-container').style.display='none';
+  document.getElementById('login-username').value='';
+  document.getElementById('login-password').value='';
+  document.getElementById('err-login').textContent='';
+  document.getElementById('admin-pwd').value='';
+  document.getElementById('err-admin').textContent='';
+  selectLoginType('student');
+}
+
+// ── Login type ───────────────────────
+function selectLoginType(t){
+  loginType=t;
+  document.getElementById('opt-student').classList.toggle('selected',t==='student');
+  document.getElementById('opt-admin').classList.toggle('selected',t==='admin');
+  document.getElementById('student-login-form').style.display=t==='student'?'block':'none';
+  document.getElementById('admin-login-form').style.display=t==='admin'?'block':'none';
+  document.getElementById('slip-container').style.display='none';
+}
+
+// ── Step navigation ───────────────────
+let currentStep=1;
+function goStep(n){
+  if(n>currentStep&&!validateStep(currentStep))return;
+  document.querySelectorAll('.reg-step').forEach(s=>s.style.display='none');
+  document.getElementById('reg-step-'+n).style.display='block';
+  document.getElementById('reg-step-'+n).scrollIntoView({behavior:'smooth',block:'start'});
+  for(let i=1;i<=6;i++){
+    const s=document.getElementById('step-'+i);
+    s.classList.remove('active','done');
+    if(i<n)s.classList.add('done');
+    if(i===n)s.classList.add('active');
+  }
+  currentStep=n;
+  if(n===5){generateUsernameSuggestions();generatePasswordSuggestions();}
+}
+
+function validateStep(n){
+  let ok=true;
+  const err=(id,msg)=>{document.getElementById(id).innerHTML=msg?'⚠️ '+msg:'';if(msg)ok=false;};
+  if(n===1){
+    err('e-name',!document.getElementById('r-name').value.trim()?'Full name is required':'');
+    err('e-dob',!document.getElementById('r-dob').value?'Date of birth is required':'');
+    err('e-gender',!document.getElementById('r-gender').value?'Please select gender':'');
+    err('e-state',!document.getElementById('r-state').value?'Please select state':'');
+    err('e-lga',!document.getElementById('r-lga').value.trim()?'LGA is required':'');
+    err('e-address',!document.getElementById('r-address').value.trim()?'Address is required':'');
+  }
+  if(n===2){
+    err('e-photo',!capturedPhoto?'Please take or upload a photo':'');
+  }
+  if(n===3){
+    err('e-program',!document.getElementById('r-program').value?'Please select a programme':'');
+  }
+  if(n===4){
+    err('e-kin-name',!document.getElementById('r-kin-name').value.trim()?'Guardian name is required':'');
+    err('e-kin-rel',!document.getElementById('r-kin-rel').value?'Please select relationship':'');
+    err('e-kin-phone',!document.getElementById('r-kin-phone').value.trim()?'Guardian phone is required':'');
+    err('e-kin-address',!document.getElementById('r-kin-address').value.trim()?'Guardian address is required':'');
+  }
+  if(n===5){
+    const u=document.getElementById('r-username').value.trim();
+    const p=document.getElementById('r-password').value;
+    err('e-username',!u?'Username is required':u.length<3?'Username too short':'');
+    err('e-password',!p?'Password is required':p.length<6?'Password must be at least 6 characters':'');
+  }
+  return ok;
+}
+
+// ── Username/password suggestions ─────
+function generateUsernameSuggestions(){
+  const name=document.getElementById('r-name').value.trim().split(' ')[0].toLowerCase()||'student';
+  const clean=name.replace(/[^a-z]/g,'');
+  const options=[
+    clean+Math.floor(Math.random()*99+1),
+    clean+'_msmr',
+    'hafiz_'+clean,
+    clean+'.kano',
+    'msmr_'+clean,
+    clean+'_'+new Date().getFullYear()
+  ];
+  document.getElementById('username-chips').innerHTML=options.map(o=>`<div class="chip" onclick="document.getElementById('r-username').value='${o}'">${o}</div>`).join('');
+}
+
+function generatePasswordSuggestions(){
+  const words=['Bismillah1','Hafiz2025','Quran786','Kano2025','MSMR786','Hifz1447'];
+  document.getElementById('pwd-chips').innerHTML=words.map(w=>`<div class="chip" onclick="document.getElementById('r-password').value='${w}'">${w}</div>`).join('');
+}
+
+// ── Camera ───────────────────────────
+async function startCamera(){
+  try{
+    cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+    const v=document.getElementById('camera-preview');
+    v.srcObject=cameraStream;v.style.display='block';
+    document.getElementById('camera-btns').style.display='none';
+    document.getElementById('capture-btns').style.display='block';
+    document.getElementById('photo-tip').textContent='Position face in frame, then click Take Photo 📸';
+  }catch(e){toast('❌ Camera unavailable. Please upload a photo.','error');}
+}
+function capturePhoto(){
+  const v=document.getElementById('camera-preview');
+  const c=document.getElementById('photo-canvas');
+  c.width=v.videoWidth||400;c.height=v.videoHeight||400;
+  c.getContext('2d').drawImage(v,0,0,c.width,c.height);
+  capturedPhoto=c.toDataURL('image/jpeg',0.82);
+  showThumb(capturedPhoto);stopCamera();
+  document.getElementById('retake-btns').style.display='block';
+  document.getElementById('photo-tip').textContent='✅ Photo captured! Looking good 😊';
+  document.getElementById('e-photo').textContent='';
+}
+function uploadPhoto(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{capturedPhoto=e.target.result;showThumb(capturedPhoto);
+    document.getElementById('retake-btns').style.display='block';
+    document.getElementById('photo-tip').textContent='✅ Photo uploaded!';
+    document.getElementById('e-photo').textContent='';
+  };r.readAsDataURL(f);
+}
+function showThumb(src){
+  const t=document.getElementById('photo-thumb');t.src=src;t.style.display='block';
+  document.getElementById('camera-preview').style.display='none';
+}
+function stopCamera(){
+  if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;}
+  document.getElementById('camera-preview').style.display='none';
+  document.getElementById('capture-btns').style.display='none';
+  if(!capturedPhoto)document.getElementById('camera-btns').style.display='block';
+}
+function retakePhoto(){
+  capturedPhoto=null;
+  document.getElementById('photo-thumb').style.display='none';
+  document.getElementById('retake-btns').style.display='none';
+  document.getElementById('camera-btns').style.display='block';
+  document.getElementById('photo-tip').textContent='Take or upload a clear front-facing photo';
+}
+
+// ── REGISTER SUBMIT ───────────────────
+async function submitRegistration(){
+  const a1=document.getElementById('agree1').checked;
+  const a2=document.getElementById('agree2').checked;
+  const a3=document.getElementById('agree3').checked;
+  if(!a1||!a2||!a3){
+    document.getElementById('e-agree').innerHTML='⚠️ Please check all agreement boxes before submitting.';
+    return;
+  }
+  document.getElementById('e-agree').textContent='';
+  const btn=document.getElementById('reg-btn');
+  btn.textContent='⏳ Submitting…';btn.classList.add('loading');
+  try{
+    await sbInsert('students',{
+      student_id:genId(),
+      full_name:document.getElementById('r-name').value.trim(),
+      dob:document.getElementById('r-dob').value,
+      phone:document.getElementById('r-phone').value.trim()||null,
+      photo_data:capturedPhoto,
+      program:document.getElementById('r-program').value,
+      gender:document.getElementById('r-gender').value,
+      state:document.getElementById('r-state').value,
+      lga:document.getElementById('r-lga').value.trim(),
+      address:document.getElementById('r-address').value.trim(),
+      illness:document.getElementById('r-illness').value.trim()||null,
+      username:document.getElementById('r-username').value.trim(),
+      password:document.getElementById('r-password').value,
+      email:document.getElementById('r-email').value.trim()||null,
+      kin_name:document.getElementById('r-kin-name').value.trim(),
+      kin_email:document.getElementById('r-kin-email').value.trim()||null,
+      kin_relationship:document.getElementById('r-kin-rel').value,
+      kin_address:document.getElementById('r-kin-address').value.trim(),
+      interview_date:'',interview_time:'',venue:'',approved:false
+    });
+    spawnEmoji(['🎉','🤲','📖','✨','🌟','🕌','🎊']);
+    toast('🎉 Registration successful! Use your username & password to check your slip.');
+    goStep(1);
+    setTimeout(()=>resetRegForm(),1500);
+    loadStudentCount();
+  }catch(e){
+    const msg=e.message||'';
+    if(msg.includes('username'))toast('❌ That username is already taken. Please choose another.','error');
+    else toast('❌ Registration failed. Please try again.','error');
+  }finally{btn.textContent='🚀 Submit Application!';btn.classList.remove('loading');}
+}
+
+function resetRegForm(){
+  ['r-name','r-dob','r-phone','r-lga','r-address','r-illness','r-username','r-password','r-email','r-kin-name','r-kin-email','r-kin-address'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  ['r-gender','r-state','r-program','r-kin-rel'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  ['agree1','agree2','agree3'].forEach(id=>{document.getElementById(id).checked=false;});
+  capturedPhoto=null;
+  document.getElementById('photo-thumb').style.display='none';
+  document.getElementById('retake-btns').style.display='none';
+  document.getElementById('camera-btns').style.display='block';
+  document.getElementById('photo-tip').textContent='Take or upload a clear front-facing photo';
+  currentStep=1;
+}
+
+// ── STUDENT LOGIN ─────────────────────
+async function doStudentLogin(){
+  const username=document.getElementById('login-username').value.trim();
+  const password=document.getElementById('login-password').value;
+  document.getElementById('err-login').textContent='';
+  if(!username||!password){document.getElementById('err-login').innerHTML='⚠️ Please enter username and password.';return;}
+  const btn=document.getElementById('login-btn');btn.textContent='🔍 Searching…';btn.classList.add('loading');
+  try{
+    const rows=await sbSelect('students',`username=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}`);
+    if(rows&&rows.length>0){showSlip(rows[0]);spawnEmoji(['🎫','✨','📋','🌟']);}
+    else document.getElementById('err-login').innerHTML='❌ Incorrect username or password.';
+  }catch(e){document.getElementById('err-login').innerHTML='❌ Connection error. Try again.';}
+  finally{btn.textContent='🎫 View My Interview Slip';btn.classList.remove('loading');}
+}
+
+// ── ADMIN LOGIN ───────────────────────
+async function doAdminLogin(){
+  const pwd=document.getElementById('admin-pwd').value;
+  document.getElementById('err-admin').textContent='';
+  if(!pwd){document.getElementById('err-admin').innerHTML='⚠️ Enter the admin password.';return;}
+  const btn=document.getElementById('admin-btn');btn.textContent='🔍 Checking…';btn.classList.add('loading');
+  let granted=pwd==='MSMR@2026';
+  if(!granted){
+    try{const rows=await sbSelect('admins',`password=eq.${encodeURIComponent(pwd)}`);if(rows&&rows.length>0)granted=true;}catch(e){}
+  }
+  btn.textContent='🛡️ Enter Admin Dashboard';btn.classList.remove('loading');
+  if(granted){spawnEmoji(['🛡️','✅','🔓','🌟']);showPage('admin');loadStudents();loadAdminSettings();loadAdmins();loadNoticesAdmin();loadStats();}
+  else document.getElementById('err-admin').innerHTML='❌ Incorrect password.';
+}
+
+// ── SHOW SLIP ─────────────────────────
+function showSlip(s){
+  document.getElementById('slip-logo').src=LOGO_SRC;
+  const ph=document.getElementById('slip-photo');
+  if(s.photo_data){ph.outerHTML=`<img id="slip-photo" class="slip-student-photo" src="${s.photo_data}" alt="Photo"/>`;}
+  else{const el=document.getElementById('slip-photo');el.className='slip-student-photo';el.textContent='👤';}
+  document.getElementById('slip-name').textContent=s.full_name||'—';
+  document.getElementById('slip-id').textContent='ID: '+(s.student_id||'—');
+  document.getElementById('slip-program').textContent=s.program||'—';
+  document.getElementById('slip-phone').textContent=s.phone||'Not provided';
+  document.getElementById('slip-dob').textContent=s.dob?new Date(s.dob).toLocaleDateString('en-GB'):'—';
+  document.getElementById('slip-gender').textContent=s.gender||'—';
+  document.getElementById('slip-state').textContent=(s.state||'—')+(s.lga?' / '+s.lga:'');
+  document.getElementById('slip-address').textContent=s.address||'—';
+  document.getElementById('slip-kin').textContent=s.kin_name?(s.kin_name+(s.kin_relationship?' ('+s.kin_relationship+')':'')):'—';
+  document.getElementById('slip-reg-date').textContent=s.registered_at?new Date(s.registered_at).toLocaleDateString('en-GB'):'—';
+  const ic=document.getElementById('slip-interview-cells');
+  if(s.interview_date&&s.interview_time&&s.venue){
+    const d=new Date(s.interview_date+'T'+s.interview_time);
+    ic.innerHTML=`
+      <div class="slip-cell interview"><label>📅 Interview Date</label><p>${d.toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p></div>
+      <div class="slip-cell interview"><label>🕐 Time</label><p>${d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</p></div>
+      <div class="slip-cell full interview"><label>📍 Venue</label><p>${s.venue}</p></div>`;
+  }else{ic.innerHTML='<div class="slip-pending-box">⏳ Interview details not set yet. Please check back later or contact the school.</div>';}
+  document.getElementById('slip-container').style.display='block';
+  document.getElementById('slip-container').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ── LOAD STUDENTS ─────────────────────
+async function loadStudents(){
+  document.getElementById('students-tbody').innerHTML='<tr><td colspan="9"><div class="spinner"></div></td></tr>';
+  document.getElementById('approve-tbody').innerHTML='<tr><td colspan="6"><div class="spinner"></div></td></tr>';
+  try{
+    allStudents=await sbSelect('students','order=registered_at.desc')||[];
+    renderStudents();renderApproveTable();updateSidebarCounts();
+  }catch(e){document.getElementById('students-tbody').innerHTML='<tr><td colspan="9" class="no-data">❌ Failed to load data.</td></tr>';}
+}
+
+function updateSidebarCounts(){
+  document.getElementById('sidebar-count').textContent=allStudents.length;
+  document.getElementById('sidebar-pending').textContent=allStudents.filter(s=>!s.approved).length;
+}
+
+let studentFilter='all';
+function setFilter(f,btn){
+  studentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');renderStudents();
+}
+
+function renderStudents(){
+  const q=(document.getElementById('search-input')?.value||'').toLowerCase();
+  let list=allStudents.filter(s=>
+    (s.full_name||'').toLowerCase().includes(q)||
+    (s.username||'').toLowerCase().includes(q)||
+    (s.phone||'').includes(q)
+  );
+  if(studentFilter==='approved')list=list.filter(s=>s.approved);
+  if(studentFilter==='pending')list=list.filter(s=>!s.approved);
+  document.getElementById('admin-count').textContent=list.length;
+  if(!list.length){document.getElementById('students-tbody').innerHTML='<tr><td colspan="9" class="no-data">👥 No students found.</td></tr>';return;}
+  document.getElementById('students-tbody').innerHTML=list.map((s,i)=>`
+    <tr>
+      <td>${s.photo_data?`<img class="student-thumb" src="${s.photo_data}" alt="photo"/>`:`<div class="student-avatar">${(s.full_name||'?')[0]}</div>`}</td>
+      <td><strong>${s.full_name||'—'}</strong><br/><span style="font-size:11px;color:var(--gray-400);">${s.dob||''}</span></td>
+      <td>${s.username||'—'}</td>
+      <td>${s.phone||'<em style="color:var(--gray-400)">—</em>'}</td>
+      <td><span class="badge badge-program">${s.program||'—'}</span></td>
+      <td>${s.gender||'—'}</td>
+      <td>${s.state||'—'}</td>
+      <td><span class="badge ${s.approved?'badge-approved':'badge-pending'}">${s.approved?'✅ Approved':'⏳ Pending'}</span></td>
+      <td>
+        <button class="btn-edit" onclick="openEdit('${s.id}')">✏️</button>
+        <button class="btn-delete" onclick="deleteStudent('${s.id}','${(s.full_name||'').replace(/'/g,"\\'")}')" >🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+function renderApproveTable(){
+  const pending=allStudents.filter(s=>!s.approved);
+  if(!pending.length){document.getElementById('approve-tbody').innerHTML='<tr><td colspan="6" class="no-data">✅ All students have been approved!</td></tr>';return;}
+  document.getElementById('approve-tbody').innerHTML=pending.map(s=>`
+    <tr>
+      <td><input type="checkbox" class="approve-check" data-id="${s.id}"/></td>
+      <td>${s.photo_data?`<img class="student-thumb" src="${s.photo_data}"/>`:`<div class="student-avatar">${(s.full_name||'?')[0]}</div>`}</td>
+      <td><strong>${s.full_name||'—'}</strong></td>
+      <td><span class="badge badge-program">${s.program||'—'}</span></td>
+      <td>${s.phone||'—'}</td>
+      <td><span class="badge badge-pending">⏳ Pending</span></td>
+    </tr>`).join('');
+  document.querySelectorAll('.approve-check').forEach(c=>c.addEventListener('change',updateSelectedCount));
+}
+
+function updateSelectedCount(){
+  const n=document.querySelectorAll('.approve-check:checked').length;
+  document.getElementById('selected-count').textContent=n+' selected';
+}
+function selectAllPending(){document.querySelectorAll('.approve-check').forEach(c=>c.checked=true);updateSelectedCount();}
+function clearSelection(){document.querySelectorAll('.approve-check').forEach(c=>c.checked=false);updateSelectedCount();}
+function toggleAllCheck(master){document.querySelectorAll('.approve-check').forEach(c=>c.checked=master.checked);updateSelectedCount();}
+
+async function bulkApprove(){
+  const date=document.getElementById('bulk-date').value;
+  const time=document.getElementById('bulk-time').value;
+  const venue=document.getElementById('bulk-venue').value.trim();
+  if(!date||!time||!venue){toast('⚠️ Please fill date, time and venue first.','error');return;}
+  const ids=[...document.querySelectorAll('.approve-check:checked')].map(c=>c.dataset.id);
+  if(!ids.length){toast('⚠️ No students selected.','error');return;}
+  try{
+    for(const id of ids){
+      await sbUpdate('students',`id=eq.${id}`,{interview_date:date,interview_time:time,venue,approved:true});
+    }
+    toast(`✅ ${ids.length} student(s) approved with interview details!`);
+    spawnEmoji(['✅','🎉','📅','🌟']);
+    await loadStudents();
+  }catch(e){toast('❌ Bulk approve failed.','error');}
+}
+
+// ── EDIT MODAL ────────────────────────
+function openEdit(id){
+  const s=allStudents.find(x=>x.id===id);if(!s)return;
+  editingId=id;
+  document.getElementById('modal-name').textContent=s.full_name;
+  document.getElementById('modal-date').value=s.interview_date||'';
+  document.getElementById('modal-time').value=s.interview_time||'';
+  document.getElementById('modal-venue').value=s.venue||'';
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeModal(){document.getElementById('edit-modal').classList.remove('open');editingId=null;}
+async function saveEdit(){
+  const date=document.getElementById('modal-date').value;
+  const time=document.getElementById('modal-time').value;
+  const venue=document.getElementById('modal-venue').value.trim();
+  if(!date||!time||!venue){toast('⚠️ Fill all fields.','error');return;}
+  try{
+    await sbUpdate('students',`id=eq.${editingId}`,{interview_date:date,interview_time:time,venue,approved:true});
+    const idx=allStudents.findIndex(x=>x.id===editingId);
+    if(idx>-1)Object.assign(allStudents[idx],{interview_date:date,interview_time:time,venue,approved:true});
+    renderStudents();renderApproveTable();updateSidebarCounts();
+    closeModal();toast('✅ Interview details saved!');
+  }catch(e){toast('❌ Save failed.','error');}
+}
+
+// ── DELETE ────────────────────────────
+async function deleteStudent(id,name){
+  if(!confirm(`🗑️ Delete "${name}"? Cannot be undone.`))return;
+  try{
+    await sbDelete('students',`id=eq.${id}`);
+    allStudents=allStudents.filter(x=>x.id!==id);
+    renderStudents();renderApproveTable();updateSidebarCounts();
+    toast('🗑️ Student removed.');
+  }catch(e){toast('❌ Delete failed.','error');}
+}
+
+// ── NOTICES ───────────────────────────
+async function loadNotices(){
+  try{
+    const rows=await sbSelect('announcements','order=created_at.desc')||[];
+    const hot=rows.filter(r=>r.is_hot);
+    const modal=document.getElementById('hot-modal');
+    const body=document.getElementById('hot-modal-body');
+    if(hot.length>0){
+      body.innerHTML=hot.map(h=>`<div class="hot-notif-item"><h4>${h.title}</h4><p>${h.body}</p></div>`).join('');
+      modal.classList.remove('hidden');
+    }
+    const grid=document.getElementById('notice-grid');
+    if(!rows.length){grid.innerHTML='<div class="no-notices">📋 No announcements yet. Check back soon!</div>';return;}
+    grid.innerHTML=rows.slice(0,6).map(r=>`
+      <div class="notice-card">
+        ${r.is_hot?'<span style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:.4rem;display:block;">🔥 HOT</span>':''}
+        <h4>${r.title}</h4>
+        <p>${r.body}</p>
+        <div class="notice-date">📅 ${new Date(r.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</div>
+      </div>`).join('');
+  }catch(e){document.getElementById('notice-grid').innerHTML='<div class="no-notices">Unable to load announcements.</div>';}
+}
+
+async function loadNoticesAdmin(){
+  try{
+    const rows=await sbSelect('announcements','order=created_at.desc')||[];
+    const el=document.getElementById('notices-list');
+    if(!rows.length){el.innerHTML='<div class="no-data">No announcements yet.</div>';return;}
+    el.innerHTML=rows.map(r=>`
+      <div class="admin-item">
+        <div><strong style="font-size:13px;">${r.title}</strong> ${r.is_hot?'🔥':''}
+        <p style="font-size:12px;color:var(--gray-600);margin-top:3px;">${r.body.substring(0,80)}…</p></div>
+        <button class="btn-delete" onclick="deleteNotice('${r.id}')">🗑️</button>
+      </div>`).join('');
+  }catch(e){}
+}
+
+async function addNotice(){
+  const title=document.getElementById('notif-title').value.trim();
+  const body=document.getElementById('notif-body').value.trim();
+  const is_hot=document.getElementById('notif-hot').checked;
+  if(!title||!body){toast('⚠️ Please enter title and message.','error');return;}
+  try{
+    await sbInsert('announcements',{title,body,is_hot});
+    document.getElementById('notif-title').value='';
+    document.getElementById('notif-body').value='';
+    document.getElementById('notif-hot').checked=false;
+    await loadNoticesAdmin();
+    toast('📢 Announcement published!');
+  }catch(e){toast('❌ Failed to publish.','error');}
+}
+
+async function deleteNotice(id){
+  if(!confirm('Delete this announcement?'))return;
+  try{await sbDelete('announcements',`id=eq.${id}`);await loadNoticesAdmin();toast('🗑️ Deleted.');}
+  catch(e){toast('❌ Failed.','error');}
+}
+
+// ── ADMINS ────────────────────────────
+let allAdmins=[];
+async function loadAdmins(){
+  try{
+    allAdmins=await sbSelect('admins','order=created_at.asc')||[];
+    const el=document.getElementById('admin-list');
+    el.innerHTML='<div class="admin-item"><div style="display:flex;align-items:center;gap:8px;"><div class="admin-avatar-sm">M</div><div><div style="font-size:13px;font-weight:700;">Master Admin</div><div style="font-size:11px;color:var(--gray-400);">Built-in</div></div></div><span class="badge-owner">👑 Owner</span></div>'+
+    allAdmins.map(a=>`<div class="admin-item"><div style="display:flex;align-items:center;gap:8px;"><div class="admin-avatar-sm">${(a.name||'A')[0].toUpperCase()}</div><div><div style="font-size:13px;font-weight:700;">${a.name}</div></div></div><div style="display:flex;gap:6px;align-items:center;"><span class="badge-admin-tag">🛡️ Admin</span><button class="btn-delete" onclick="removeAdmin('${a.id}','${(a.name||'').replace(/'/g,"\\'")}')">🗑️</button></div></div>`).join('');
+  }catch(e){}
+}
+async function addAdmin(){
+  const name=document.getElementById('new-admin-name').value.trim();
+  const pwd=document.getElementById('new-admin-pwd').value.trim();
+  if(!name||!pwd){toast('⚠️ Enter name and password.','error');return;}
+  if(pwd.length<6){toast('⚠️ Password must be 6+ characters.','error');return;}
+  try{await sbInsert('admins',{name,password:pwd});document.getElementById('new-admin-name').value='';document.getElementById('new-admin-pwd').value='';await loadAdmins();toast('✅ Admin added!');}
+  catch(e){toast('❌ Failed to add admin.','error');}
+}
+async function removeAdmin(id,name){
+  if(!confirm(`Remove admin "${name}"?`))return;
+  try{await sbDelete('admins',`id=eq.${id}`);await loadAdmins();toast('🗑️ Admin removed.');}
+  catch(e){toast('❌ Failed.','error');}
+}
+
+// ── SETTINGS ─────────────────────────
+async function loadAdminSettings(){
+  try{
+    const rows=await sbSelect('settings')||[];
+    rows.forEach(r=>{
+      if(r.key==='imageUrl')document.getElementById('setting-image').value=r.value||'';
+    });
+  }catch(e){}
+}
+async function saveSetting(type){
+  try{
+    if(type==='image'){
+      const value=document.getElementById('setting-image').value.trim();
+      await sbUpsert('settings',{key:'imageUrl',value});
+      const bg=document.getElementById('hero-bg');
+      if(value){bg.style.backgroundImage=`url('${value}')`;bg.classList.add('loaded');}
+      toast('✅ Hero photo updated!');
+    }
+  }catch(e){toast('❌ Save failed.','error');}
+}
+
+async function loadStats(){
+  try{
+    const total=allStudents.length;
+    const approved=allStudents.filter(s=>s.approved).length;
+    const pending=total-approved;
+    document.getElementById('admin-stats').innerHTML=`
+      👥 Total Students: <strong>${total}</strong><br/>
+      ✅ Approved: <strong>${approved}</strong><br/>
+      ⏳ Pending: <strong>${pending}</strong><br/>
+      📅 Last Updated: <strong>${new Date().toLocaleTimeString('en-GB')}</strong>`;
+  }catch(e){}
+}
+
+// ── PANEL SWITCHER ────────────────────
+function showPanel(name,el){
+  document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  if(name==='admins')loadAdmins();
+  if(name==='notices')loadNoticesAdmin();
+  if(name==='settings'){loadAdminSettings();loadStats();}
+}
+function adminLogout(){showPage('home');toast('👋 Logged out.');}
+
+// ── CSV EXPORT ────────────────────────
+function exportCSV(){
+  const h=['ID','Name','DOB','Phone','Programme','Gender','State','LGA','Username','Guardian','Relationship','Status','Interview Date','Venue'];
+  const rows=allStudents.map(s=>[s.student_id,s.full_name,s.dob,s.phone,s.program,s.gender,s.state,s.lga,s.username,s.kin_name,s.kin_relationship,s.approved?'Approved':'Pending',s.interview_date,s.venue].map(v=>`"${(v||'').replace(/"/g,'""')}"`));
+  const csv=[h,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='msmr_students_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+
+// ── LOAD SETTINGS ─────────────────────
+async function loadSettings(){
+  try{
+    const rows=await sbSelect('settings')||[];
+    rows.forEach(r=>{
+      if(r.key==='imageUrl'&&r.value){
+        const bg=document.getElementById('hero-bg');
+        bg.style.backgroundImage=`url('${r.value}')`;bg.classList.add('loaded');
+      }
+    });
+  }catch(e){}
+}
+
+async function loadStudentCount(){
+  try{
+    const r=await fetch(`${API}/students?select=id`,{headers:{...H,"Prefer":"count=exact"}});
+    const count=r.headers.get('content-range')?.split('/')[1]||'0';
+    document.getElementById('stat-students').textContent=count;
+  }catch(e){document.getElementById('stat-students').textContent='—';}
+}
+
+// ── ENTER KEY ─────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  const ap=document.querySelector('.page.active').id;
+  if(ap==='page-login'){loginType==='student'?doStudentLogin():doAdminLogin();}
+});
+document.getElementById('edit-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+// ── BOOT ──────────────────────────────
+loadSettings();
+loadStudentCount();
+loadNotices();
+</script>
+</body>
+</html>
